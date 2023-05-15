@@ -18,9 +18,9 @@ public class servidor {
             //System.setProperty("java.rmi.server.hostname","192.168.1.107");
             Registry reg = LocateRegistry.createRegistry(port);
 
-            Replica replicaInicial = new Replica(host, port);
-            Replica replica1 = new Replica(host, port);
-            Replica replica2 = new Replica(host, port);
+            Replica replicaInicial = new Replica(host, port, 1);
+            Replica replica1 = new Replica(host, port, 2);
+            Replica replica2 = new Replica(host, port, 3);
 
             // Colocamos las referencias de las réplicas en forma circular (como se indica en el diagrama).
 

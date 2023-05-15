@@ -5,19 +5,23 @@ import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 public class Replica extends UnicastRemoteObject implements I_Replica {
+    private int ID;
     private float totalDonadoLocal = 0;
+
     Replica replicaSiguiente = null;
     Replica replicaAnterior = null;
     ArrayList<String> clientes = new ArrayList<String>();
     ArrayList<Boolean> clienteDona = new ArrayList<Boolean>();
     private Registry registroReplica;
     
-    public Replica(String host, int port) throws RemoteException {
+    public Replica(String host, int port, int id) throws RemoteException {
+        this.ID = id;
         this.registroReplica = LocateRegistry.getRegistry(host, port);    
     }
 
     // Métodos locales.
     public void addCliente(String cliente) {
+        System.out.println("Réplica " + ID + ": Registrando cliente: " + cliente + "\n");
         clientes.add(cliente);
         clienteDona.add(false);
     }
@@ -46,10 +50,18 @@ public class Replica extends UnicastRemoteObject implements I_Replica {
         return totalDonadoLocal;
     }
 
+    // Muestra el número de clientes de cada réplica por su ID.
+    public void mostrarClientes() {
+        System.out.println("Réplica " + ID + ": " + numClientes() + " clientes.");
+        System.out.println("Réplica " + replicaSiguiente.ID + ": " + replicaSiguiente.numClientes() + " clientes.");
+        System.out.println("Réplica " + replicaAnterior.ID + ": " + replicaAnterior.numClientes() + " clientes.");
+    }
+
     // Métodos remotos de la interfaz.
     @Override
     public void RegistrarCliente(String cliente) throws RemoteException {
         System.out.println("Registrando cliente: " + cliente);
+        mostrarClientes();
 
         // Como debe ser de forma transparente, no se indica que se va a hacer en otra réplica si no se puede registrar en esta.
         if(!tengoAlCliente(cliente) && !replicaAnterior.tengoAlCliente(cliente) && !replicaSiguiente.tengoAlCliente(cliente)) {
