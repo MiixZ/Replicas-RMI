@@ -84,11 +84,20 @@ public class cliente {
 
                     case 2:
                         float cantidad = elegirCantidad();
-                        replica.donar(nombreActual, cantidad);
+                        if(cantidad > 0)
+                            replica.donar(nombreActual, cantidad);
+                        else
+                            System.out.println("Debes donar una cantidad válida.\n");
                         break;
 
                     case 3:
-                        System.out.println("Total donado: " + replica.totalDonado(nombreActual));
+                        float cantidadTotal = replica.totalDonado(nombreActual);
+                        if(cantidadTotal >= 0)
+                            System.out.println("Total donado: " + cantidadTotal + "€.");
+                        else if(cantidadTotal == -1) 
+                            System.out.println("No has donado nada, no puedes ver cuánto se ha donado.\n");
+                            else if(cantidadTotal == -2)
+                                System.out.println("Regístrate para poder donar y ver cuánto se ha donado.\n");
                         break;
 
                     case 4:
