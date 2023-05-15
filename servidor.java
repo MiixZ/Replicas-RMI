@@ -3,7 +3,6 @@ import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.*;
-//import contador.contador;
 
 public class servidor {
     public static void main(String[] args) {
@@ -11,16 +10,20 @@ public class servidor {
         if (System.getSecurityManager() == null) {
             System.setSecurityManager(new SecurityManager());
         }
+        String host = args[0];
+        int port = Integer.parseInt(args[1]);
+        
         try {
             // Crea una instancia de contador.
             //System.setProperty("java.rmi.server.hostname","192.168.1.107");
-            Registry reg=LocateRegistry.createRegistry(1999);
+            Registry reg = LocateRegistry.createRegistry(port);
 
-            Replica replicaInicial = new Replica();
-            Replica replica1 = new Replica();
-            Replica replica2 = new Replica();
+            Replica replicaInicial = new Replica(host, port);
+            Replica replica1 = new Replica(host, port);
+            Replica replica2 = new Replica(host, port);
 
             // Colocamos las referencias de las réplicas en forma circular (como se indica en el diagrama).
+
             replicaInicial.replicaSiguiente = replica1;
             replicaInicial.replicaAnterior = replica2;
             replica1.replicaSiguiente = replica2;
@@ -28,12 +31,12 @@ public class servidor {
             replica2.replicaSiguiente = replicaInicial;
             replica2.replicaAnterior = replica1;
 
-            Naming.rebind("ReplicaInicial", replicaInicial);
-            Naming.rebind("ReplicaDerecha", replica1);
-            Naming.rebind("ReplicaIzquierda", replica2);
+            reg.rebind("ReplicaInicial", replicaInicial);
+            reg.rebind("ReplicaDerecha", replica1);
+            reg.rebind("ReplicaIzquierda", replica2);
 
             System.out.println("Servidor RemoteException | MalformedURLExceptiondor preparado.");
-        } catch (RemoteException | MalformedURLException e) {
+        } catch (RemoteException e) {
             System.out.println("Exception: " + e.getMessage());
         }
     }

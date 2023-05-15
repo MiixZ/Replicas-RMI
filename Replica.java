@@ -1,5 +1,7 @@
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 
 public class Replica extends UnicastRemoteObject implements I_Replica {
@@ -8,9 +10,10 @@ public class Replica extends UnicastRemoteObject implements I_Replica {
     Replica replicaAnterior = null;
     ArrayList<String> clientes = new ArrayList<String>();
     ArrayList<Boolean> clienteDona = new ArrayList<Boolean>();
+    private Registry registroReplica;
     
-    public Replica() throws RemoteException {
-                
+    public Replica(String host, int port) throws RemoteException {
+        this.registroReplica = LocateRegistry.getRegistry(host, port);    
     }
 
     // Métodos locales.
