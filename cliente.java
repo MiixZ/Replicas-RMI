@@ -9,8 +9,9 @@ public class cliente {
         System.out.println("1. Registrarse.");
         System.out.println("2. Donar.");
         System.out.println("3. Total donado.");
-        System.out.println("4. Salir (cambiar usuario).");
-        System.out.println("5. Salir del programa.\n");
+        System.out.println("4. Total donado por mí.");
+        System.out.println("5. Salir (cambiar usuario).");
+        System.out.println("6. Salir del programa.\n");
     }
 
     public static int elegirOpcion() {
@@ -21,7 +22,7 @@ public class cliente {
             System.out.print("Elige una opción válida: \n");
             menu();
             opcion = sc.nextInt();
-        } while(opcion < 1 || opcion > 4);
+        } while(opcion < 1 || opcion > 6);
 
         return opcion;
     }
@@ -72,6 +73,7 @@ public class cliente {
             String nombreActual = elegirNombre();
             System.out.println("Bienvenido, " + nombreActual + ".\n");
             int opcion = 0;
+            Boolean salir = false;
 
             do {
                 opcion = elegirOpcion();
@@ -85,7 +87,8 @@ public class cliente {
                     case 2:
                         float cantidad = elegirCantidad();
                         if(cantidad > 0)
-                            replica.donar(nombreActual, cantidad);
+                            if(replica.donar(nombreActual, cantidad) == -1)
+                                System.out.println("No estás registrado, no puedes donar.\n");
                         else
                             System.out.println("Debes donar una cantidad válida.\n");
                         break;
@@ -101,18 +104,23 @@ public class cliente {
                         break;
 
                     case 4:
-                        nombreActual = elegirNombre();
+                        String mensaje = replica.consultarDonacion(nombreActual);
+                        System.out.println(mensaje);
                         break;
 
                     case 5:
-                        System.out.println("Saliendo del programa...");
+                        nombreActual = elegirNombre();
+                        break;
+
+                    case 6:
+                        salir = true;
                         break;
 
                     default:
                         System.out.println("Opción no válida.");
                         break;
                 }
-            } while (opcion != 5);
+            } while (opcion != 6 && !salir);
 
         } catch(NotBoundException | RemoteException e) {
             System.err.println("Exception del sistema: " + e);

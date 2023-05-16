@@ -1,0 +1,1 @@
+java -cp . -Djava.security.policy=server.policy cliente localhost

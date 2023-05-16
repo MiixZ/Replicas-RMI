@@ -7,4 +7,6 @@ public interface I_Replica extends Remote {
     int donar(String cliente, float cantidad) throws RemoteException;
 
     float totalDonado(String cliente) throws RemoteException;
+
+    String consultarDonacion(String cliente) throws RemoteException;
 }

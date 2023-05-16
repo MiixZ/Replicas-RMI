@@ -3,6 +3,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Replica extends UnicastRemoteObject implements I_Replica {
     private int ID;
@@ -10,8 +12,11 @@ public class Replica extends UnicastRemoteObject implements I_Replica {
 
     Replica replicaSiguiente = null;
     Replica replicaAnterior = null;
+
     ArrayList<String> clientes = new ArrayList<String>();
     ArrayList<Boolean> clienteDona = new ArrayList<Boolean>();
+    ArrayList<Map<String, Float>> donacionesCliente = new ArrayList<Map<String, Float>>();
+
     private Registry registroReplica;
     
     public Replica(String host, int port, int id) throws RemoteException {
@@ -24,6 +29,11 @@ public class Replica extends UnicastRemoteObject implements I_Replica {
         System.out.println("Réplica " + ID + ": Registrando cliente: " + cliente + "\n");
         clientes.add(cliente);
         clienteDona.add(false);
+
+        // Crea una donación vacía para el cliente.
+        Map<String, Float> donaciones = new HashMap<String, Float>();
+        donaciones.put(cliente, (float) 0.0);
+        donacionesCliente.add(donaciones);
     }
 
     public Boolean tengoAlCliente(String cliente) {
@@ -48,6 +58,16 @@ public class Replica extends UnicastRemoteObject implements I_Replica {
 
     public float getTotalDonadoLocal() {
         return totalDonadoLocal;
+    }
+
+    public void actualizarDonacionCliente(String cliente, float NuevaDonacion) {
+        int indiceCliente = clientes.indexOf(cliente);
+        Map<String, Float> donaciones = donacionesCliente.get(indiceCliente);
+
+        // Sumo la nueva donación a la donación total del cliente.
+        float donacionTotal = donaciones.get(cliente) + NuevaDonacion;
+        donaciones.put(cliente, donacionTotal);
+        donacionesCliente.set(indiceCliente, donaciones);
     }
 
     // Muestra el número de clientes de cada réplica por su ID.
@@ -91,6 +111,9 @@ public class Replica extends UnicastRemoteObject implements I_Replica {
         if(tengoAlCliente(cliente)) {
             totalDonadoLocal += cantidad;
             clienteDona.set(clientes.indexOf(cliente), true);
+
+            actualizarDonacionCliente(cliente, cantidad);
+
             System.out.println("El cliente ha donado " + cantidad + "€.\n");
             return 0;
         } else if(replicaAnterior.tengoAlCliente(cliente)) {
@@ -123,6 +146,21 @@ public class Replica extends UnicastRemoteObject implements I_Replica {
         } else {
             System.out.println("El cliente no está registrado.\n");
             return -2;
+        }
+    }
+
+    // Consulta la donación de un cliente en una réplica.
+    @Override
+    public String consultarDonacion(String cliente) throws RemoteException {
+        if(tengoAlCliente(cliente)) {
+            float donacion = donacionesCliente.get(clientes.indexOf(cliente)).get(cliente);
+            return "El cliente " + cliente + " ha donado en total: " + donacion + "€.\n";
+        } else if (replicaAnterior.tengoAlCliente(cliente)) {
+            return replicaAnterior.consultarDonacion(cliente);
+        } else if (replicaSiguiente.tengoAlCliente(cliente)) {
+            return replicaSiguiente.consultarDonacion(cliente);
+        } else {
+            return "No estás registrado.\n";
         }
     }
 }
